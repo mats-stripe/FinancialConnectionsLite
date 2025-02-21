@@ -122,7 +122,10 @@ extension AuthFlowViewController: WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        if let url = navigationAction.request.url, url.scheme == returnUrl.scheme {
+        let successUrl = "stripe-auth://link-accounts/success"
+        let cancelUrl = "stripe-auth://link-accounts/cancel"
+        let dismissUrls = [successUrl, cancelUrl]
+        if let url = navigationAction.request.url, dismissUrls.contains(url.absoluteString) {
             decisionHandler(.cancel)
             completion?(.success(url))
             dismiss(animated: true, completion: nil)
