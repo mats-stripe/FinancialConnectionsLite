@@ -37,6 +37,8 @@ public class FinancialConnectionsLite {
                 apiClient: apiClient
             )
             let navigationController = UINavigationController(rootViewController: containerViewController)
+            navigationController.navigationBar.isHidden = true
+
             let animated: Bool
             
             if UIDevice.current.userInterfaceIdiom == .pad {
