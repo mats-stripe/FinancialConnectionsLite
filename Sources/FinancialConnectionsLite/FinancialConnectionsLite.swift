@@ -26,27 +26,31 @@ public class FinancialConnectionsLite {
         self.apiClient = FinancialConnectionsApiClient(publishableKey: publishableKey)
     }
     
-    @MainActor
     public func present(from viewController: UIViewController) {
-        let containerViewController = ContainerViewController(
-            clientSecret: clientSecret,
-            returnUrl: returnUrl,
-            apiClient: apiClient
-        )
-        let navigationController = UINavigationController(rootViewController: containerViewController)
-
-        let viewControllerToPresent: UIViewController
-        let animated: Bool
+        // Capture viewController in a local constant
+        let presentingViewController = viewController
         
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            navigationController.modalPresentationStyle = .formSheet
-            viewControllerToPresent = navigationController
-            animated = true
-        } else {
-            viewControllerToPresent = ModalPresentationWrapperViewController(vc: navigationController)
-            animated = false
+        Task { @MainActor in
+            let containerViewController = ContainerViewController(
+                clientSecret: clientSecret,
+                returnUrl: returnUrl,
+                apiClient: apiClient
+            )
+            let navigationController = UINavigationController(rootViewController: containerViewController)
+            
+            let viewControllerToPresent: UIViewController
+            let animated: Bool
+            
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                navigationController.modalPresentationStyle = .formSheet
+                viewControllerToPresent = navigationController
+                animated = true
+            } else {
+                viewControllerToPresent = ModalPresentationWrapperViewController(vc: navigationController)
+                animated = false
+            }
+            
+            presentingViewController.present(viewControllerToPresent, animated: animated)
         }
-        
-        viewController.present(viewControllerToPresent, animated: animated)
     }
 }
