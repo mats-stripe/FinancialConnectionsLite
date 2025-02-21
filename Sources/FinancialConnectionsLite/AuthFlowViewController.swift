@@ -122,13 +122,18 @@ extension AuthFlowViewController: WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        if let url = navigationAction.request.url, url.absoluteString.hasPrefix(returnUrl.absoluteString) {
+        if let url = navigationAction.request.url, url.scheme == returnUrl.scheme {
             decisionHandler(.cancel)
             completion?(.success(url))
             dismiss(animated: true, completion: nil)
         } else {
             decisionHandler(.allow)
         }
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        completion?(.failure(error))
+        dismiss(animated: true, completion: nil)
     }
 }
 
