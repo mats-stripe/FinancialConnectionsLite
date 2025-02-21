@@ -8,10 +8,9 @@
 import Foundation
 
 struct FinancialConnectionsApiClient {
-    static let shared = FinancialConnectionsApiClient()
-    static var publishableKey: String!
-
     private static let decoder = JSONDecoder()
+
+    private let publishableKey: String
 
     private enum Endpoint {
         private static let baseApiUrl: URL = URL(string: "https://api.stripe.com/v1")!
@@ -29,10 +28,12 @@ struct FinancialConnectionsApiClient {
         }
     }
 
-    private init() {}
+    init(publishableKey: String) {
+        self.publishableKey = publishableKey
+    }
 
     /// Generates a hosted auth url for a `LinkAccountSession`.
-    static func generateHostedUrl(
+    func generateHostedUrl(
         clientSecret: String,
         returnUrl: URL
     ) async throws -> LinkAccountSessionManifest {
@@ -46,7 +47,7 @@ struct FinancialConnectionsApiClient {
         return try await post(endpoint: .generateHostedUrl, parameters: parameters)
     }
     
-    private static func post<T: Decodable>(
+    private func post<T: Decodable>(
         endpoint: Endpoint,
         parameters: [String: Any]
     ) async throws -> T {
@@ -68,6 +69,6 @@ struct FinancialConnectionsApiClient {
         )
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        return try decoder.decode(T.self, from: data)
+        return try Self.decoder.decode(T.self, from: data)
     }
 }

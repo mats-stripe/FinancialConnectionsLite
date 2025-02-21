@@ -8,6 +8,9 @@ public class FinancialConnectionsLite {
     /// get back to your app after completing authentication in another app (such as bank app or Safari).
     let returnUrl: URL
     
+    /// The APIClient instance used to make requests to Stripe
+    private let apiClient: FinancialConnectionsApiClient
+    
     /// Initializes `FinancialConnectionsLite`
     /// - Parameters:
     ///   - clientSecret: The client secret of a Stripe `FinancialConnectionsSession` object.
@@ -20,15 +23,15 @@ public class FinancialConnectionsLite {
     ) {
         self.clientSecret = clientSecret
         self.returnUrl = returnUrl
-
-        FinancialConnectionsApiClient.shared.publishableKey = publishableKey
+        self.apiClient = FinancialConnectionsApiClient(publishableKey: publishableKey)
     }
     
     @MainActor
     public func present(from viewController: UIViewController) {
         let containerViewController = ContainerViewController(
             clientSecret: clientSecret,
-            returnUrl: returnUrl
+            returnUrl: returnUrl,
+            apiClient: apiClient
         )
         let navigationController = UINavigationController(rootViewController: containerViewController)
 

@@ -10,12 +10,14 @@ import UIKit
 class ContainerViewController: UIViewController {
     private let clientSecret: String
     private let returnUrl: URL
+    private let apiClient: FinancialConnectionsApiClient
 
     private let spinner = UIActivityIndicatorView(style: .large)
 
-    init(clientSecret: String, returnUrl: URL) {
+    init(clientSecret: String, returnUrl: URL, apiClient: FinancialConnectionsApiClient) {
         self.clientSecret = clientSecret
         self.returnUrl = returnUrl
+        self.apiClient = apiClient
         super.init()
     }
 
@@ -48,7 +50,7 @@ class ContainerViewController: UIViewController {
         }
         
         do {
-            let manifest = try await FinancialConnectionsApiClient.generateHostedUrl(
+            let manifest = try await apiClient.generateHostedUrl(
                 clientSecret: clientSecret,
                 returnUrl: returnUrl
             )
