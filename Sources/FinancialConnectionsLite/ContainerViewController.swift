@@ -66,21 +66,20 @@ class ContainerViewController: UIViewController {
     }
         
     private func showWebView(for manifest: LinkAccountSessionManifest) async {
-        await MainActor.run {
-            let authFlowViewController = AuthFlowViewController(
-                hostedAuthUrl: manifest.hostedAuthURL,
-                returnUrl: returnUrl
-            )
-            navigationController?.setViewControllers([authFlowViewController], animated: true)
-        }
+        let authFlowViewController = AuthFlowViewController(
+            hostedAuthUrl: manifest.hostedAuthURL,
+            returnUrl: returnUrl,
+            completion: { result in
+                print(result)
+            }
+        )
+        navigationController?.setViewControllers([authFlowViewController], animated: false)
     }
     
     private func showError(_ error: Error) async {
-        await MainActor.run {
-            // Show an alert or update UI to reflect the error
-            let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            self.present(alert, animated: true)
-        }
+        // Show an alert or update UI to reflect the error
+        let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        self.present(alert, animated: true)
     }
 }

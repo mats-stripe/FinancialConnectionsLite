@@ -13,10 +13,13 @@ class AuthFlowViewController: UIViewController {
     private let hostedAuthUrl: URL
     private let returnUrl: URL
     private var webAuthenticationSession: ASWebAuthenticationSession?
+    
+    private var completion: ((Result<URL, Error>) -> Void)?
 
-    init(hostedAuthUrl: URL, returnUrl: URL) {
+    init(hostedAuthUrl: URL, returnUrl: URL, completion: ((Result<URL, Error>) -> Void)?) {
         self.hostedAuthUrl = hostedAuthUrl
         self.returnUrl = returnUrl
+        self.completion = completion
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -45,6 +48,7 @@ class AuthFlowViewController: UIViewController {
         ])
 
         webView.uiDelegate = self
+        webView.navigationDelegate = self
     }
 }
 
@@ -109,6 +113,22 @@ extension AuthFlowViewController: WKUIDelegate {
         webAuthenticationSession.presentationContextProvider = self
         webAuthenticationSession.prefersEphemeralWebBrowserSession = true // disable the initial Apple alert
         webAuthenticationSession.start()
+    }
+}
+
+extension AuthFlowViewController: WKNavigationDelegate {
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        if let url = navigationAction.request.url, url.absoluteString.hasPrefix(returnUrl.absoluteString) {
+            decisionHandler(.cancel)
+            completion?(.success(url))
+            dismiss(animated: true, completion: nil)
+        } else {
+            decisionHandler(.allow)
+        }
     }
 }
 
