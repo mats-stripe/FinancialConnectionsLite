@@ -18,7 +18,7 @@ class ContainerViewController: UIViewController {
         self.clientSecret = clientSecret
         self.returnUrl = returnUrl
         self.apiClient = apiClient
-        super.init()
+        super.init(nibName: nil, bundle: nil)
     }
 
     required init?(coder: NSCoder) {
