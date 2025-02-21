@@ -46,7 +46,8 @@ public class FinancialConnectionsLite {
                 viewControllerToPresent = navigationController
                 animated = true
             } else {
-                viewControllerToPresent = ModalPresentationWrapperViewController(vc: navigationController)
+//                viewControllerToPresent = ModalPresentationWrapperViewController(vc: navigationController)
+                viewControllerToPresent = navigationController
                 animated = false
             }
             
