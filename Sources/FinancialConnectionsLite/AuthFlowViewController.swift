@@ -17,7 +17,7 @@ class AuthFlowViewController: UIViewController {
     init(hostedAuthUrl: URL, returnUrl: URL) {
         self.hostedAuthUrl = hostedAuthUrl
         self.returnUrl = returnUrl
-        super.init()
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {

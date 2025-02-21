@@ -37,21 +37,16 @@ public class FinancialConnectionsLite {
                 apiClient: apiClient
             )
             let navigationController = UINavigationController(rootViewController: containerViewController)
-            
-            let viewControllerToPresent: UIViewController
             let animated: Bool
             
             if UIDevice.current.userInterfaceIdiom == .pad {
                 navigationController.modalPresentationStyle = .formSheet
-                viewControllerToPresent = navigationController
                 animated = true
             } else {
-//                viewControllerToPresent = ModalPresentationWrapperViewController(vc: navigationController)
-                viewControllerToPresent = navigationController
                 animated = false
             }
             
-            presentingViewController.present(viewControllerToPresent, animated: animated)
+            presentingViewController.present(navigationController, animated: animated)
         }
     }
 }
