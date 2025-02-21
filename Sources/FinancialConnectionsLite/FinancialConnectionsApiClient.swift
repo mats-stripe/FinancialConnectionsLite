@@ -41,7 +41,6 @@ struct FinancialConnectionsApiClient {
             "client_secret": clientSecret,
             "app_return_url": returnUrl.absoluteString,
             "fullscreen": true,
-//            "hide_close_button": true,
         ]
         
         return try await post(endpoint: .generateHostedUrl, parameters: parameters)

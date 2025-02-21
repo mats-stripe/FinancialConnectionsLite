@@ -1,6 +1,12 @@
 import UIKit
 
 public class FinancialConnectionsLite {
+    public enum FlowResult {
+        case success
+        case canceled
+        case failure(Error)
+    }
+
     /// The client secret of the Stripe `FinancialConnectionsSession` object.
     let clientSecret: String
     
@@ -26,29 +32,28 @@ public class FinancialConnectionsLite {
         self.apiClient = FinancialConnectionsApiClient(publishableKey: publishableKey)
     }
     
-    public func present(from viewController: UIViewController) {
-        // Capture viewController in a local constant
-        let presentingViewController = viewController
+    public func present(
+        from viewController: UIViewController,
+        completion: @escaping (FlowResult) -> Void
+    ) {
+        let containerViewController = ContainerViewController(
+            clientSecret: clientSecret,
+            returnUrl: returnUrl,
+            apiClient: apiClient,
+            completion: completion
+        )
+        let navigationController = UINavigationController(rootViewController: containerViewController)
+        navigationController.navigationBar.isHidden = true
         
-        Task { @MainActor in
-            let containerViewController = ContainerViewController(
-                clientSecret: clientSecret,
-                returnUrl: returnUrl,
-                apiClient: apiClient
-            )
-            let navigationController = UINavigationController(rootViewController: containerViewController)
-            navigationController.navigationBar.isHidden = true
-
-            let animated: Bool
-            
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                navigationController.modalPresentationStyle = .formSheet
-                animated = true
-            } else {
-                animated = false
-            }
-            
-            presentingViewController.present(navigationController, animated: animated)
+        let animated: Bool
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            navigationController.modalPresentationStyle = .formSheet
+            animated = true
+        } else {
+            animated = false
         }
+        
+        viewController.present(navigationController, animated: animated)
     }
 }

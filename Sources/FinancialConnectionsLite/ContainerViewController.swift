@@ -11,13 +11,20 @@ class ContainerViewController: UIViewController {
     private let clientSecret: String
     private let returnUrl: URL
     private let apiClient: FinancialConnectionsApiClient
+    private let completion: ((FinancialConnectionsLite.FlowResult) -> Void)
 
     private let spinner = UIActivityIndicatorView(style: .large)
 
-    init(clientSecret: String, returnUrl: URL, apiClient: FinancialConnectionsApiClient) {
+    init(
+        clientSecret: String,
+        returnUrl: URL,
+        apiClient: FinancialConnectionsApiClient,
+        completion: @escaping ((FinancialConnectionsLite.FlowResult) -> Void)
+    ) {
         self.clientSecret = clientSecret
         self.returnUrl = returnUrl
         self.apiClient = apiClient
+        self.completion = completion
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -69,8 +76,9 @@ class ContainerViewController: UIViewController {
         let authFlowViewController = AuthFlowViewController(
             hostedAuthUrl: manifest.hostedAuthURL,
             returnUrl: returnUrl,
-            completion: { result in
-                print(result)
+            completion: { [weak self] result, controller in
+                controller.dismiss(animated: true)
+                self?.completion(result)
             }
         )
         navigationController?.setViewControllers([authFlowViewController], animated: false)

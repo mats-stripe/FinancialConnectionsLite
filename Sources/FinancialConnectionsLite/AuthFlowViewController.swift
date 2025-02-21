@@ -7,16 +7,20 @@
 
 import AuthenticationServices
 import UIKit
-import WebKit
+@preconcurrency import WebKit
 
 class AuthFlowViewController: UIViewController {
     private let hostedAuthUrl: URL
     private let returnUrl: URL
-    private var webAuthenticationSession: ASWebAuthenticationSession?
-    
-    private var completion: ((Result<URL, Error>) -> Void)?
+    private let completion: ((FinancialConnectionsLite.FlowResult, AuthFlowViewController) -> Void)
 
-    init(hostedAuthUrl: URL, returnUrl: URL, completion: ((Result<URL, Error>) -> Void)?) {
+    private var webAuthenticationSession: ASWebAuthenticationSession?
+
+    init(
+        hostedAuthUrl: URL,
+        returnUrl: URL,
+        completion: @escaping ((FinancialConnectionsLite.FlowResult, AuthFlowViewController) -> Void)
+    ) {
         self.hostedAuthUrl = hostedAuthUrl
         self.returnUrl = returnUrl
         self.completion = completion
@@ -49,6 +53,35 @@ class AuthFlowViewController: UIViewController {
 
         webView.uiDelegate = self
         webView.navigationDelegate = self
+    }
+}
+
+extension AuthFlowViewController: WKNavigationDelegate {
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        guard let url = navigationAction.request.url else {
+            return
+        }
+        
+        let successUrl = "stripe-auth://link-accounts/success"
+        let cancelUrl = "stripe-auth://link-accounts/cancel"
+        
+        if url.absoluteString == successUrl {
+            decisionHandler(.cancel)
+            completion(.success, self)
+        } else if url.absoluteString == cancelUrl {
+            decisionHandler(.cancel)
+            completion(.canceled, self)
+        } else {
+            decisionHandler(.allow)
+        }
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        completion(.failure(error), self)
     }
 }
 
@@ -113,30 +146,6 @@ extension AuthFlowViewController: WKUIDelegate {
         webAuthenticationSession.presentationContextProvider = self
         webAuthenticationSession.prefersEphemeralWebBrowserSession = true // disable the initial Apple alert
         webAuthenticationSession.start()
-    }
-}
-
-extension AuthFlowViewController: WKNavigationDelegate {
-    func webView(
-        _ webView: WKWebView,
-        decidePolicyFor navigationAction: WKNavigationAction,
-        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
-    ) {
-        let successUrl = "stripe-auth://link-accounts/success"
-        let cancelUrl = "stripe-auth://link-accounts/cancel"
-        let dismissUrls = [successUrl, cancelUrl]
-        if let url = navigationAction.request.url, dismissUrls.contains(url.absoluteString) {
-            decisionHandler(.cancel)
-            completion?(.success(url))
-            dismiss(animated: true, completion: nil)
-        } else {
-            decisionHandler(.allow)
-        }
-    }
-
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        completion?(.failure(error))
-        dismiss(animated: true, completion: nil)
     }
 }
 
