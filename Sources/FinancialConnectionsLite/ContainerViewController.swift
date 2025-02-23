@@ -36,7 +36,7 @@ class ContainerViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupSpinner()
-        
+
         Task {
             await fetchHostedUrl()
         }
@@ -52,29 +52,33 @@ class ContainerViewController: UIViewController {
     }
     
     private func fetchHostedUrl() async {
-        // Show spinner
         DispatchQueue.main.async {
             self.spinner.startAnimating()
         }
-        
+
         do {
             let manifest = try await apiClient.generateHostedUrl(
                 clientSecret: clientSecret,
                 returnUrl: returnUrl
             )
-            await showWebView(for: manifest)
+            showWebView(for: manifest)
+
+            DispatchQueue.main.async {
+                self.spinner.stopAnimating()
+            }
         } catch {
-            await showError(error)
+            showError(error)
+
+            DispatchQueue.main.async {
+                self.spinner.stopAnimating()
+            }
         }
 
-        DispatchQueue.main.async {
-            self.spinner.stopAnimating()
-        }
     }
-        
-    private func showWebView(for manifest: LinkAccountSessionManifest) async {
+
+    private func showWebView(for manifest: LinkAccountSessionManifest) {
         let authFlowViewController = AuthFlowViewController(
-            hostedAuthUrl: manifest.hostedAuthURL,
+            manifest: manifest,
             returnUrl: returnUrl,
             completion: { [weak self] result, controller in
                 controller.dismiss(animated: true)
@@ -84,7 +88,7 @@ class ContainerViewController: UIViewController {
         navigationController?.setViewControllers([authFlowViewController], animated: false)
     }
     
-    private func showError(_ error: Error) async {
+    private func showError(_ error: Error) {
         // Show an alert or update UI to reflect the error
         let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))

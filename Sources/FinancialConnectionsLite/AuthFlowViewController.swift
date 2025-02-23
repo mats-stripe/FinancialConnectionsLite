@@ -10,18 +10,18 @@ import UIKit
 @preconcurrency import WebKit
 
 class AuthFlowViewController: UIViewController {
-    private let hostedAuthUrl: URL
+    private let manifest: LinkAccountSessionManifest
     private let returnUrl: URL
     private let completion: ((FinancialConnectionsLite.FlowResult, AuthFlowViewController) -> Void)
 
     private var webAuthenticationSession: ASWebAuthenticationSession?
 
     init(
-        hostedAuthUrl: URL,
+        manifest: LinkAccountSessionManifest,
         returnUrl: URL,
         completion: @escaping ((FinancialConnectionsLite.FlowResult, AuthFlowViewController) -> Void)
     ) {
-        self.hostedAuthUrl = hostedAuthUrl
+        self.manifest = manifest
         self.returnUrl = returnUrl
         self.completion = completion
         super.init(nibName: nil, bundle: nil)
@@ -39,7 +39,7 @@ class AuthFlowViewController: UIViewController {
             frame: .zero,
             configuration: WKWebViewConfiguration()
         )
-        let request = URLRequest(url: hostedAuthUrl)
+        let request = URLRequest(url: manifest.hostedAuthURL)
         webView.load(request)
 
         webView.translatesAutoresizingMaskIntoConstraints = false
@@ -65,17 +65,15 @@ extension AuthFlowViewController: WKNavigationDelegate {
         guard let url = navigationAction.request.url else {
             return
         }
-        
-        let successUrl = "stripe-auth://link-accounts/success"
-        let cancelUrl = "stripe-auth://link-accounts/cancel"
-        
-        if url.absoluteString == successUrl {
+
+        switch url {
+        case manifest.successURL:
             decisionHandler(.cancel)
             completion(.success, self)
-        } else if url.absoluteString == cancelUrl {
+        case manifest.cancelURL:
             decisionHandler(.cancel)
             completion(.canceled, self)
-        } else {
+        default:
             decisionHandler(.allow)
         }
     }
