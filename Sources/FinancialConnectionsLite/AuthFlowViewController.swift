@@ -16,6 +16,8 @@ class AuthFlowViewController: UIViewController {
 
     private var webAuthenticationSession: ASWebAuthenticationSession?
 
+    private let spinner = UIActivityIndicatorView(style: .large)
+
     init(
         manifest: LinkAccountSessionManifest,
         returnUrl: URL,
@@ -34,6 +36,7 @@ class AuthFlowViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        setupSpinner()
 
         let webView = WKWebView(
             frame: .zero,
@@ -53,6 +56,15 @@ class AuthFlowViewController: UIViewController {
 
         webView.uiDelegate = self
         webView.navigationDelegate = self
+    }
+    
+    private func setupSpinner() {
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(spinner)
+        NSLayoutConstraint.activate([
+            spinner.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            spinner.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
+        ])
     }
 }
 
@@ -77,8 +89,17 @@ extension AuthFlowViewController: WKNavigationDelegate {
             decisionHandler(.allow)
         }
     }
+    
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        spinner.startAnimating()
+    }
+    
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        spinner.stopAnimating()
+    }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        spinner.stopAnimating()
         completion(.failure(error), self)
     }
 }
