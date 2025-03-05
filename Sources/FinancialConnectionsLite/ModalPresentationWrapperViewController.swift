@@ -1,10 +1,3 @@
-//
-//  ModalPresentationWrapperViewController.swift
-//  FinancialConnectionsLite
-//
-//  Created by Mat Schmid on 2025-03-05.
-//
-
 import UIKit
 
 class ModalPresentationWrapperViewController: UIViewController {

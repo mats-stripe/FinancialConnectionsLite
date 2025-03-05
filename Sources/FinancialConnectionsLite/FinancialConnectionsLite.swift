@@ -19,6 +19,7 @@ public class FinancialConnectionsLite {
 
     // Strong references to prevent deallocation
     private var containerViewController: ContainerViewController?
+    private var navigationController: UINavigationController?
     private var wrapperViewController: ModalPresentationWrapperViewController?
     private var completionHandler: ((FlowResult) -> Void)?
 
@@ -48,25 +49,26 @@ public class FinancialConnectionsLite {
             clientSecret: clientSecret,
             returnUrl: returnUrl,
             apiClient: apiClient,
-            completion: { [weak self] result, controller in
+            completion: { [weak self] result in
                 guard let self else { return }
-                self.handleFlowCompletion(result: result, controller: controller)
+                self.handleFlowCompletion(result: result)
             }
         )
         self.containerViewController = containerVC
 
-        let navigationController = UINavigationController(rootViewController: containerVC)
-        navigationController.navigationBar.isHidden = true
+        let navController = UINavigationController(rootViewController: containerVC)
+        navController.navigationBar.isHidden = true
+        self.navigationController = navController
 
         let toPresent: UIViewController
         let animated: Bool
 
         if UIDevice.current.userInterfaceIdiom == .pad {
-            navigationController.modalPresentationStyle = .formSheet
-            toPresent = navigationController
+            navController.modalPresentationStyle = .formSheet
+            toPresent = navController
             animated = true
         } else {
-            wrapperViewController = ModalPresentationWrapperViewController(vc: navigationController)
+            wrapperViewController = ModalPresentationWrapperViewController(vc: navController)
             toPresent = wrapperViewController!
             animated = false
         }
@@ -74,9 +76,10 @@ public class FinancialConnectionsLite {
         viewController.present(toPresent, animated: animated)
     }
     
-    private func handleFlowCompletion(result: FlowResult, controller: UIViewController) {
+    private func handleFlowCompletion(result: FlowResult) {
         // First dismiss the container controller
-        controller.dismiss(animated: true) { [weak self] in
+        let controller = self.wrapperViewController ?? self.navigationController
+        controller?.dismiss(animated: true) { [weak self] in
             guard let self else { return }
 
             // Dismiss the wrapper if it exists
@@ -100,6 +103,7 @@ public class FinancialConnectionsLite {
     private func cleanupReferences() {
         // Clear all references to avoid memory leaks
         self.containerViewController = nil
+        self.navigationController = nil
         self.wrapperViewController = nil
         self.completionHandler = nil
     }
