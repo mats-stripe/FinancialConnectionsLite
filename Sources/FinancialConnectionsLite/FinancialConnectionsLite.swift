@@ -16,6 +16,8 @@ public class FinancialConnectionsLite {
     
     /// The APIClient instance used to make requests to Stripe
     private let apiClient: FinancialConnectionsApiClient
+
+    private var wrapperViewController: ModalPresentationWrapperViewController?
     
     /// Initializes `FinancialConnectionsLite`
     /// - Parameters:
@@ -40,20 +42,38 @@ public class FinancialConnectionsLite {
             clientSecret: clientSecret,
             returnUrl: returnUrl,
             apiClient: apiClient,
-            completion: completion
+            completion: { [weak self] result, controller in
+                controller.dismiss(animated: true) {
+                    if let wrapperViewController = self?.wrapperViewController {
+                        wrapperViewController.dismiss(
+                            animated: false,
+                            completion: {
+                                completion(result)
+                            }
+                        )
+                    } else {
+                        completion(result)
+                    }
+                }
+            }
         )
+
         let navigationController = UINavigationController(rootViewController: containerViewController)
         navigationController.navigationBar.isHidden = true
         
+        let toPresent: UIViewController
         let animated: Bool
-        
+
         if UIDevice.current.userInterfaceIdiom == .pad {
             navigationController.modalPresentationStyle = .formSheet
+            toPresent = navigationController
             animated = true
         } else {
+            wrapperViewController = ModalPresentationWrapperViewController(vc: navigationController)
+            toPresent = wrapperViewController!
             animated = false
         }
         
-        viewController.present(navigationController, animated: animated)
+        viewController.present(toPresent, animated: animated)
     }
 }

@@ -11,7 +11,7 @@ class ContainerViewController: UIViewController {
     private let clientSecret: String
     private let returnUrl: URL
     private let apiClient: FinancialConnectionsApiClient
-    private let completion: ((FinancialConnectionsLite.FlowResult) -> Void)
+    private let completion: ((FinancialConnectionsLite.FlowResult, ContainerViewController) -> Void)
 
     private let spinner = UIActivityIndicatorView(style: .large)
 
@@ -19,7 +19,7 @@ class ContainerViewController: UIViewController {
         clientSecret: String,
         returnUrl: URL,
         apiClient: FinancialConnectionsApiClient,
-        completion: @escaping ((FinancialConnectionsLite.FlowResult) -> Void)
+        completion: @escaping ((FinancialConnectionsLite.FlowResult, ContainerViewController) -> Void)
     ) {
         self.clientSecret = clientSecret
         self.returnUrl = returnUrl
@@ -80,9 +80,9 @@ class ContainerViewController: UIViewController {
         let authFlowViewController = AuthFlowViewController(
             manifest: manifest,
             returnUrl: returnUrl,
-            completion: { [weak self] result, controller in
-                controller.dismiss(animated: true)
-                self?.completion(result)
+            completion: { [weak self] result in
+                guard let self else { return }
+                self.completion(result, self)
             }
         )
         navigationController?.setViewControllers([authFlowViewController], animated: false)

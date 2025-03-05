@@ -12,7 +12,7 @@ import UIKit
 class AuthFlowViewController: UIViewController {
     private let manifest: LinkAccountSessionManifest
     private let returnUrl: URL
-    private let completion: ((FinancialConnectionsLite.FlowResult, AuthFlowViewController) -> Void)
+    private let completion: ((FinancialConnectionsLite.FlowResult) -> Void)
 
     private var webAuthenticationSession: ASWebAuthenticationSession?
 
@@ -21,7 +21,7 @@ class AuthFlowViewController: UIViewController {
     init(
         manifest: LinkAccountSessionManifest,
         returnUrl: URL,
-        completion: @escaping ((FinancialConnectionsLite.FlowResult, AuthFlowViewController) -> Void)
+        completion: @escaping ((FinancialConnectionsLite.FlowResult) -> Void)
     ) {
         self.manifest = manifest
         self.returnUrl = returnUrl
@@ -81,10 +81,10 @@ extension AuthFlowViewController: WKNavigationDelegate {
         switch url {
         case manifest.successURL:
             decisionHandler(.cancel)
-            completion(.success, self)
+            completion(.success)
         case manifest.cancelURL:
             decisionHandler(.cancel)
-            completion(.canceled, self)
+            completion(.canceled)
         default:
             decisionHandler(.allow)
         }
@@ -100,7 +100,7 @@ extension AuthFlowViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         spinner.stopAnimating()
-        completion(.failure(error), self)
+        completion(.failure(error))
     }
 }
 
