@@ -66,6 +66,7 @@ public class FinancialConnectionsLite: NSObject {
 
         let navController = UINavigationController(rootViewController: containerVC)
         navController.navigationBar.isHidden = true
+        navController.presentationController?.delegate = self
         self.navigationController = navController
 
         let toPresent: UIViewController
@@ -80,9 +81,6 @@ public class FinancialConnectionsLite: NSObject {
             toPresent = wrapperViewController!
             animated = false
         }
-        
-        // Set presentation delegate to intercept dismissal attempts
-        toPresent.presentationController?.delegate = self
 
         viewController.present(toPresent, animated: animated)
     }
