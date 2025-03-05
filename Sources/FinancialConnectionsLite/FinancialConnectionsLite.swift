@@ -22,6 +22,9 @@ public class FinancialConnectionsLite {
     private var navigationController: UINavigationController?
     private var wrapperViewController: ModalPresentationWrapperViewController?
     private var completionHandler: ((FlowResult) -> Void)?
+    
+    // Static collection to retain instances
+    private static var activeInstances = Set<FinancialConnectionsLite>()
 
     /// Initializes `FinancialConnectionsLite`
     /// - Parameters:
@@ -42,8 +45,17 @@ public class FinancialConnectionsLite {
         from viewController: UIViewController,
         completion: @escaping (FlowResult) -> Void
     ) {
-        // Store the completion handler for later use
-        self.completionHandler = completion
+        // Retain self in the static collection
+        Self.activeInstances.insert(self)
+        
+        // Store the completion handler
+        self.completionHandler = { result in
+            // Call original completion
+            completion(result)
+            
+            // Remove self from active instances
+            Self.activeInstances.remove(self)
+        }
 
         let containerVC = ContainerViewController(
             clientSecret: clientSecret,
@@ -58,6 +70,7 @@ public class FinancialConnectionsLite {
 
         let navController = UINavigationController(rootViewController: containerVC)
         navController.navigationBar.isHidden = true
+        navController.isModalInPresentation = true
         self.navigationController = navController
 
         let toPresent: UIViewController
@@ -106,5 +119,14 @@ public class FinancialConnectionsLite {
         self.navigationController = nil
         self.wrapperViewController = nil
         self.completionHandler = nil
+    }
+    
+    // Make FinancialConnectionsLite conform to Hashable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+    
+    public static func == (lhs: FinancialConnectionsLite, rhs: FinancialConnectionsLite) -> Bool {
+        return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
     }
 }
