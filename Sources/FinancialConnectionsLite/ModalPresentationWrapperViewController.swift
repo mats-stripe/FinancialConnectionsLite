@@ -9,7 +9,7 @@ import UIKit
 
 class ModalPresentationWrapperViewController: UIViewController {
 
-    private weak var vc: UIViewController?
+    private var vc: UIViewController?
 
     // MARK: - Init
 
@@ -31,6 +31,10 @@ class ModalPresentationWrapperViewController: UIViewController {
         view.alpha = 0.3
         view.backgroundColor = .black
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
 
         if let vc, presentedViewController == nil {
             self.present(vc, animated: true)
@@ -44,4 +48,3 @@ class ModalPresentationWrapperViewController: UIViewController {
         dismiss(animated: false)
     }
 }
-
