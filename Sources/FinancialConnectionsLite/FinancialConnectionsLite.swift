@@ -1,6 +1,6 @@
 import UIKit
 
-public class FinancialConnectionsLite {
+public class FinancialConnectionsLite: NSObject {
     public enum FlowResult {
         case success
         case canceled
@@ -66,7 +66,8 @@ public class FinancialConnectionsLite {
 
         let navController = UINavigationController(rootViewController: containerVC)
         navController.navigationBar.isHidden = true
-        navController.isModalInPresentation = true
+        // Set presentation delegate to intercept dismissal attempts
+        navController.presentationController?.delegate = self
         self.navigationController = navController
 
         let toPresent: UIViewController
@@ -112,5 +113,37 @@ public class FinancialConnectionsLite {
         // Clear all references to avoid memory leaks
         self.navigationController = nil
         self.wrapperViewController = nil
+    }
+}
+
+extension FinancialConnectionsLite: UIAdaptivePresentationControllerDelegate {
+    public func presentationControllerDidAttemptToDismiss(_ presentationController: UIPresentationController) {
+        showDismissConfirmation(presentedBy: presentationController.presentedViewController)
+    }
+    
+    private func showDismissConfirmation(presentedBy viewController: UIViewController) {
+        let alertController = UIAlertController(
+            title: "Are you sure you want to exit?",
+            message: "You haven't finished linking you bank account and all progress will be lost.",
+            preferredStyle: .alert
+        )
+        
+        // Add cancel option
+        alertController.addAction(UIAlertAction(
+            title: "Cancel",
+            style: .cancel
+        ))
+
+        // Add confirm option
+        alertController.addAction(UIAlertAction(
+            title: "Yes, exit",
+            style: .default,
+            handler: { [weak self] _ in
+                guard let self = self else { return }
+                self.handleFlowCompletion(result: .canceled)
+            }
+        ))
+        
+        viewController.present(alertController, animated: true)
     }
 }
