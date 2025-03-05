@@ -124,6 +124,11 @@ extension FinancialConnectionsLite: UIAdaptivePresentationControllerDelegate {
         showDismissConfirmation(presentedBy: presentationController.presentedViewController)
     }
     
+    public func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
+        // Return false to prevent automatic dismissal
+        return false
+    }
+    
     private func showDismissConfirmation(presentedBy viewController: UIViewController) {
         let alertController = UIAlertController(
             title: "Are you sure you want to exit?",
