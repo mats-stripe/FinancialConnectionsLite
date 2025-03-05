@@ -14,6 +14,8 @@ class ContainerViewController: UIViewController {
     private let completion: ((FinancialConnectionsLite.FlowResult, ContainerViewController) -> Void)
 
     private let spinner = UIActivityIndicatorView(style: .large)
+    
+    private var authFlowViewController: AuthFlowViewController?
 
     init(
         clientSecret: String,
@@ -77,15 +79,17 @@ class ContainerViewController: UIViewController {
     }
 
     private func showWebView(for manifest: LinkAccountSessionManifest) {
-        let authFlowViewController = AuthFlowViewController(
+        let authFlowVC = AuthFlowViewController(
             manifest: manifest,
             returnUrl: returnUrl,
             completion: { [weak self] result in
                 guard let self else { return }
+                self.authFlowViewController = nil
                 self.completion(result, self)
             }
         )
-        navigationController?.setViewControllers([authFlowViewController], animated: false)
+        self.authFlowViewController = authFlowVC
+        navigationController?.setViewControllers([authFlowVC], animated: false)
     }
     
     private func showError(_ error: Error) {
