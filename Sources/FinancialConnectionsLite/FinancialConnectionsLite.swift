@@ -120,8 +120,9 @@ public class FinancialConnectionsLite {
         self.wrapperViewController = nil
         self.completionHandler = nil
     }
-    
-    // Make FinancialConnectionsLite conform to Hashable
+}
+
+extension FinancialConnectionsLite: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(self))
     }
