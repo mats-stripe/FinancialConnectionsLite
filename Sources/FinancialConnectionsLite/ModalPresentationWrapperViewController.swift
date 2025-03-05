@@ -31,12 +31,8 @@ class ModalPresentationWrapperViewController: UIViewController {
         view.alpha = 0.3
         view.backgroundColor = .black
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTap)))
-    }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        if let vc = vc, presentedViewController == nil {
+        if let vc, presentedViewController == nil {
             self.present(vc, animated: true)
         }
     }
