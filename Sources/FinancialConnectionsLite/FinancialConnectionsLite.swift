@@ -64,7 +64,7 @@ public class FinancialConnectionsLite {
 
         let navigationController = UINavigationController(rootViewController: containerViewController!)
         navigationController.navigationBar.isHidden = true
-        navigationController.isModalInPresentation = true
+//        navigationController.isModalInPresentation = true
 
         let toPresent: UIViewController
         let animated: Bool
