@@ -78,6 +78,8 @@ extension AuthFlowViewController: WKNavigationDelegate {
             return
         }
 
+        print("**** URL Redirected: \(url.absoluteString)")
+
         switch url {
         case manifest.successURL:
             decisionHandler(.cancel)
