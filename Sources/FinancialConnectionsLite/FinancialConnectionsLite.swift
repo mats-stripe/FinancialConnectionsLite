@@ -9,7 +9,7 @@ public class FinancialConnectionsLite {
 
     /// The client secret of the Stripe `FinancialConnectionsSession` object.
     let clientSecret: String
-    
+
     /// A URL that redirects back to your app that `FinancialConnectionsLite` can use to
     /// get back to your app after completing authentication in another app (such as a bank app or Safari).
     let returnUrl: URL
@@ -18,7 +18,6 @@ public class FinancialConnectionsLite {
     private let apiClient: FinancialConnectionsApiClient
 
     // Strong references to prevent deallocation
-//    private var containerViewController: ContainerViewController?
     private var navigationController: UINavigationController?
     private var wrapperViewController: ModalPresentationWrapperViewController?
     private var completionHandler: ((FlowResult) -> Void)?
@@ -40,18 +39,18 @@ public class FinancialConnectionsLite {
         self.returnUrl = returnUrl
         self.apiClient = FinancialConnectionsApiClient(publishableKey: publishableKey)
     }
-    
+
     public func present(
         from viewController: UIViewController,
         completion: @escaping (FlowResult) -> Void
     ) {
-        // Retain self in the static collection
+        // Store self as the active instance
         Self.activeInstance = self
-        
+
         self.completionHandler = { result in
             // Call original completion
             completion(result)
-            // Remove self from active instances
+            // Clear the active instance reference
             Self.activeInstance = nil
         }
 
@@ -64,7 +63,6 @@ public class FinancialConnectionsLite {
                 self.handleFlowCompletion(result: result)
             }
         )
-//        self.containerViewController = containerVC
 
         let navController = UINavigationController(rootViewController: containerVC)
         navController.navigationBar.isHidden = true
@@ -88,7 +86,7 @@ public class FinancialConnectionsLite {
     }
     
     private func handleFlowCompletion(result: FlowResult) {
-        // First dismiss the container controller
+        // First dismiss the navigation controller
         self.navigationController?.dismiss(animated: true) { [weak self] in
             guard let self else { return }
 
@@ -112,7 +110,6 @@ public class FinancialConnectionsLite {
     
     private func cleanupReferences() {
         // Clear all references to avoid memory leaks
-//        self.containerViewController = nil
         self.navigationController = nil
         self.wrapperViewController = nil
     }
