@@ -11,20 +11,20 @@ public class FinancialConnectionsLite {
     let clientSecret: String
     
     /// A URL that redirects back to your app that `FinancialConnectionsLite` can use to
-    /// get back to your app after completing authentication in another app (such as bank app or Safari).
+    /// get back to your app after completing authentication in another app (such as a bank app or Safari).
     let returnUrl: URL
     
     /// The APIClient instance used to make requests to Stripe
     private let apiClient: FinancialConnectionsApiClient
 
     // Strong references to prevent deallocation
-    private var containerViewController: ContainerViewController?
+//    private var containerViewController: ContainerViewController?
     private var navigationController: UINavigationController?
     private var wrapperViewController: ModalPresentationWrapperViewController?
     private var completionHandler: ((FlowResult) -> Void)?
-    
-    // Static collection to retain instances
-    private static var activeInstances = Set<FinancialConnectionsLite>()
+
+    // Static reference to hold the active instance
+    private static var activeInstance: FinancialConnectionsLite?
 
     /// Initializes `FinancialConnectionsLite`
     /// - Parameters:
@@ -46,15 +46,13 @@ public class FinancialConnectionsLite {
         completion: @escaping (FlowResult) -> Void
     ) {
         // Retain self in the static collection
-        Self.activeInstances.insert(self)
+        Self.activeInstance = self
         
-        // Store the completion handler
         self.completionHandler = { result in
             // Call original completion
             completion(result)
-            
             // Remove self from active instances
-            Self.activeInstances.remove(self)
+            Self.activeInstance = nil
         }
 
         let containerVC = ContainerViewController(
@@ -66,7 +64,7 @@ public class FinancialConnectionsLite {
                 self.handleFlowCompletion(result: result)
             }
         )
-        self.containerViewController = containerVC
+//        self.containerViewController = containerVC
 
         let navController = UINavigationController(rootViewController: containerVC)
         navController.navigationBar.isHidden = true
@@ -91,8 +89,7 @@ public class FinancialConnectionsLite {
     
     private func handleFlowCompletion(result: FlowResult) {
         // First dismiss the container controller
-        let controller = self.wrapperViewController ?? self.navigationController
-        controller?.dismiss(animated: true) { [weak self] in
+        self.navigationController?.dismiss(animated: true) { [weak self] in
             guard let self else { return }
 
             // Dismiss the wrapper if it exists
@@ -115,19 +112,8 @@ public class FinancialConnectionsLite {
     
     private func cleanupReferences() {
         // Clear all references to avoid memory leaks
-        self.containerViewController = nil
+//        self.containerViewController = nil
         self.navigationController = nil
         self.wrapperViewController = nil
-        self.completionHandler = nil
-    }
-}
-
-extension FinancialConnectionsLite: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(ObjectIdentifier(self))
-    }
-    
-    public static func == (lhs: FinancialConnectionsLite, rhs: FinancialConnectionsLite) -> Bool {
-        return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
     }
 }
