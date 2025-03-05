@@ -7,15 +7,6 @@
 
 import UIKit
 
-class FinancialConnectionsNavigationController: UINavigationController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        navigationBar.isHidden = true
-        isModalInPresentation = true
-    }
-}
-
 class ContainerViewController: UIViewController {
     private let clientSecret: String
     private let returnUrl: URL
@@ -23,10 +14,6 @@ class ContainerViewController: UIViewController {
     private let completion: ((FinancialConnectionsLite.FlowResult, ContainerViewController) -> Void)
 
     private let spinner = UIActivityIndicatorView(style: .large)
-
-    lazy var navController: FinancialConnectionsNavigationController = {
-        FinancialConnectionsNavigationController(rootViewController: self)
-    }()
 
     init(
         clientSecret: String,
@@ -98,7 +85,7 @@ class ContainerViewController: UIViewController {
                 self.completion(result, self)
             }
         )
-        navController.setViewControllers([authFlowViewController], animated: false)
+        navigationController?.setViewControllers([authFlowViewController], animated: false)
     }
     
     private func showError(_ error: Error) {

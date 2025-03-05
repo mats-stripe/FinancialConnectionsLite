@@ -19,7 +19,7 @@ public class FinancialConnectionsLite {
 
     private var containerViewController: ContainerViewController?
     private var wrapperViewController: ModalPresentationWrapperViewController?
-    
+
     /// Initializes `FinancialConnectionsLite`
     /// - Parameters:
     ///   - clientSecret: The client secret of a Stripe `FinancialConnectionsSession` object.
@@ -62,7 +62,9 @@ public class FinancialConnectionsLite {
             }
         )
 
-        let navigationController = containerViewController!.navController
+        let navigationController = UINavigationController(rootViewController: containerViewController!)
+        navigationController.navigationBar.isHidden = true
+        navigationController.isModalInPresentation = true
 
         let toPresent: UIViewController
         let animated: Bool
