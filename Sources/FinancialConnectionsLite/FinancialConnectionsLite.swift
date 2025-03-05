@@ -17,6 +17,7 @@ public class FinancialConnectionsLite {
     /// The APIClient instance used to make requests to Stripe
     private let apiClient: FinancialConnectionsApiClient
 
+    private var containerViewController: ContainerViewController?
     private var wrapperViewController: ModalPresentationWrapperViewController?
     
     /// Initializes `FinancialConnectionsLite`
@@ -38,7 +39,7 @@ public class FinancialConnectionsLite {
         from viewController: UIViewController,
         completion: @escaping (FlowResult) -> Void
     ) {
-        let containerViewController = ContainerViewController(
+        self.containerViewController = ContainerViewController(
             clientSecret: clientSecret,
             returnUrl: returnUrl,
             apiClient: apiClient,
@@ -48,17 +49,20 @@ public class FinancialConnectionsLite {
                         wrapperViewController.dismiss(
                             animated: false,
                             completion: {
+                                self?.containerViewController = nil
+                                self?.wrapperViewController = nil
                                 completion(result)
                             }
                         )
                     } else {
+                        self?.containerViewController = nil
                         completion(result)
                     }
                 }
             }
         )
 
-        let navigationController = containerViewController.navController
+        let navigationController = containerViewController!.navController
 
         let toPresent: UIViewController
         let animated: Bool
