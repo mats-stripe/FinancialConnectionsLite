@@ -42,6 +42,9 @@ class AuthFlowViewController: UIViewController {
             frame: .zero,
             configuration: WKWebViewConfiguration()
         )
+        if #available(iOS 16.4, *) {
+            webView.isInspectable = true
+        }
         let request = URLRequest(url: manifest.hostedAuthURL)
         webView.load(request)
 
