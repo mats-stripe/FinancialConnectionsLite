@@ -86,7 +86,7 @@ extension AuthFlowViewController: WKNavigationDelegate {
         switch url {
         case manifest.successURL:
             decisionHandler(.cancel)
-            completion(.success)
+            completion(.success(manifest.id))
         case manifest.cancelURL:
             decisionHandler(.cancel)
             completion(.canceled)

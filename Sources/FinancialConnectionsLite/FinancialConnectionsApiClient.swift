@@ -54,14 +54,11 @@ struct FinancialConnectionsApiClient {
     ) async throws -> SynchronizePayload {
         let mobileParameters: [String: Any] = [
             "fullscreen": true,
-            "forced_authflow_version": "v3",
             "app_return_url": returnUrl,
         ]
         let parameters: [String: Any] = [
-            "expand": ["manifest.active_auth_session"],
             "client_secret": clientSecret,
             "mobile": mobileParameters,
-            "locale": "en-CA",
         ]
         return try await post(endpoint: .synchronize, parameters: parameters)
     }
