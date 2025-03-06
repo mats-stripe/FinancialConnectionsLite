@@ -67,7 +67,7 @@ struct FinancialConnectionsApiClient {
         endpoint: Endpoint,
         parameters: [String: Any]
     ) async throws -> T {
-        var request = URLRequest(url: Endpoint.generateHostedUrl.url)
+        var request = URLRequest(url: endpoint.url)
         let formData = URLEncoder.queryString(from: parameters).data(using: .utf8)
         request.httpBody = formData
         request.httpMethod = "POST"
