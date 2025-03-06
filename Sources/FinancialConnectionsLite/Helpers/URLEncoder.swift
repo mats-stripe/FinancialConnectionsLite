@@ -28,6 +28,18 @@ enum URLEncoder {
                 // Recursively flatten nested dictionaries
                 let nestedParams = flattenParameters(dict, prefix: keyPath)
                 flattenedParams.merge(nestedParams) { (_, new) in new }
+            } else if let array = value as? [Any] {
+                // Handle arrays by using indexed notation
+                for (index, item) in array.enumerated() {
+                    let arrayKeyPath = "\(keyPath)[\(index)]"
+                    
+                    if let nestedDict = item as? [String: Any] {
+                        let nestedParams = flattenParameters(nestedDict, prefix: arrayKeyPath)
+                        flattenedParams.merge(nestedParams) { (_, new) in new }
+                    } else {
+                        flattenedParams[arrayKeyPath] = stringFromValue(item)
+                    }
+                }
             } else {
                 // Store regular parameter
                 flattenedParams[keyPath] = stringFromValue(value)
