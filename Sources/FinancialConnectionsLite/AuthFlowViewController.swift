@@ -81,17 +81,31 @@ extension AuthFlowViewController: WKNavigationDelegate {
             return
         }
 
-        print("**** URL Redirected: \(url.absoluteString)")
+        print("**** decidePolicyFor: \(url.absoluteString)")
 
+        handle(url: url, decisionHandler: decisionHandler)
+    }
+    
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        guard let url = webView.url else {
+            return
+        }
+
+        print("**** didCommit: \(url.absoluteString)")
+
+        handle(url: url)
+    }
+    
+    private func handle(url: URL, decisionHandler: ((WKNavigationActionPolicy) -> Void)? = nil) {
         switch url {
         case manifest.successURL:
-            decisionHandler(.cancel)
+            decisionHandler?(.cancel)
             completion(.success(manifest.id))
         case manifest.cancelURL:
-            decisionHandler(.cancel)
+            decisionHandler?(.cancel)
             completion(.canceled)
         default:
-            decisionHandler(.allow)
+            decisionHandler?(.allow)
         }
     }
     
