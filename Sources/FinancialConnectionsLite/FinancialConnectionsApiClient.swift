@@ -61,10 +61,11 @@ struct FinancialConnectionsApiClient {
             "expand": ["manifest.active_auth_session"],
             "client_secret": clientSecret,
             "mobile": mobileParameters,
+            "locale": "en-CA",
         ]
         return try await post(endpoint: .synchronize, parameters: parameters)
     }
-    
+
     private func post<T: Decodable>(
         endpoint: Endpoint,
         parameters: [String: Any]
