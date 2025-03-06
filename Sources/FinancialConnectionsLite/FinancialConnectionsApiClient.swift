@@ -16,10 +16,12 @@ struct FinancialConnectionsApiClient {
         private static let baseApiUrl: URL = URL(string: "https://api.stripe.com/v1")!
 
         case generateHostedUrl
+        case synchronize
 
         var path: String {
             switch self {
             case .generateHostedUrl: "link_account_sessions/generate_hosted_url"
+            case .synchronize: "financial_connections/sessions/synchronize"
             }
         }
 
@@ -44,6 +46,21 @@ struct FinancialConnectionsApiClient {
         ]
         
         return try await post(endpoint: .generateHostedUrl, parameters: parameters)
+    }
+    
+    func synchronize(
+        clientSecret: String,
+        returnUrl: URL
+    ) async throws -> SynchronizePayload {
+        let mobileParameters: [String: Any] = [
+            "fullscreen": true,
+            "app_return_url": returnUrl
+        ]
+        let parameters: [String: Any] = [
+            "client_secret": clientSecret,
+            "mobile": mobileParameters
+        ]
+        return try await post(endpoint: .synchronize, parameters: parameters)
     }
     
     private func post<T: Decodable>(

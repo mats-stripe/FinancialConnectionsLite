@@ -7,6 +7,10 @@
 
 import Foundation
 
+struct SynchronizePayload: Decodable {
+    let manifest: LinkAccountSessionManifest
+}
+
 struct LinkAccountSessionManifest: Decodable {
     let hostedAuthURL: URL
     let successURL: URL

@@ -59,11 +59,11 @@ class ContainerViewController: UIViewController {
         }
 
         do {
-            let manifest = try await apiClient.generateHostedUrl(
+            let synchronize = try await apiClient.synchronize(
                 clientSecret: clientSecret,
                 returnUrl: returnUrl
             )
-            showWebView(for: manifest)
+            showWebView(for: synchronize.manifest)
 
             DispatchQueue.main.async {
                 self.spinner.stopAnimating()
