@@ -132,9 +132,9 @@ public enum PaymentMethodType: String, Decodable {
 public enum Permission: String, Decodable {
     case balances
     case ownership
-    case paymentMethod
+    case paymentMethod = "payment_method"
     case transactions
-    case accountNumbers
+    case accountNumbers = "account_numbers"
 }
 
 public enum Subcategory: String, Decodable {
