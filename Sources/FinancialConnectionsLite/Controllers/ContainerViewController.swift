@@ -88,7 +88,7 @@ class ContainerViewController: UIViewController {
         }
 
         do {
-            let session = try await apiClient.fetchSessionWithAccounts(clientSecret: clientSecret)
+            let session = try await apiClient.fetchSession(clientSecret: clientSecret)
             if session.accounts.data.isEmpty {
                 completion(.canceled)
             } else {

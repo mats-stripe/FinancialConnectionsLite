@@ -146,7 +146,7 @@ extension FinancialConnectionsApiClient {
         )
     }
     
-    private func fetchSession(
+    func fetchSession(
         clientSecret: String
     ) async throws -> Session {
         let parameters: [String: Any] = [
