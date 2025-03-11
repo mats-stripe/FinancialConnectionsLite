@@ -16,14 +16,14 @@ struct FinancialConnectionsApiClient {
         private static let baseApiUrl: URL = URL(string: "https://api.stripe.com/v1")!
 
         case synchronize
-        case fetchSession
-        case fetchAccounts
+        case complete
+        case listAccounts
 
         var path: String {
             switch self {
             case .synchronize: "financial_connections/sessions/synchronize"
-            case .fetchSession: "link_account_sessions/session_receipt"
-            case .fetchAccounts: "link_account_sessions/list_accounts"
+            case .complete: "link_account_sessions/complete"
+            case .listAccounts: "link_account_sessions/list_accounts"
             }
         }
 
@@ -102,7 +102,7 @@ extension FinancialConnectionsApiClient {
         clientSecret: String
     ) async throws -> Session {
         // First, get the initial session
-        let initialSession = try await fetchSession(clientSecret: clientSecret)
+        let initialSession = try await completeSession(clientSecret: clientSecret)
 
         // If there are no more accounts to fetch, return the session as is
         if !initialSession.accounts.hasMore {
@@ -118,7 +118,7 @@ extension FinancialConnectionsApiClient {
         // Continue fetching accounts until there are no more or we've reached 100
         while hasMore && allAccounts.count < maxNumberOfAccountsToFetch {
             // Fetch next page of accounts
-            let accountList = try await fetchAccounts(
+            let accountList = try await listAccounts(
                 clientSecret: clientSecret,
                 startingAfterAccountId: lastAccountId
             )
@@ -146,16 +146,16 @@ extension FinancialConnectionsApiClient {
         )
     }
     
-    func fetchSession(
+    private func completeSession(
         clientSecret: String
     ) async throws -> Session {
         let parameters: [String: Any] = [
             "client_secret": clientSecret,
         ]
-        return try await get(endpoint: .fetchSession, parameters: parameters)
+        return try await post(endpoint: .complete, parameters: parameters)
     }
 
-    private func fetchAccounts(
+    private func listAccounts(
         clientSecret: String,
         startingAfterAccountId: String?
     ) async throws -> AccountList {
@@ -165,6 +165,6 @@ extension FinancialConnectionsApiClient {
         if let startingAfterAccountId = startingAfterAccountId {
             parameters["starting_after"] = startingAfterAccountId
         }
-        return try await get(endpoint: .fetchAccounts, parameters: parameters)
+        return try await get(endpoint: .listAccounts, parameters: parameters)
     }
 }
