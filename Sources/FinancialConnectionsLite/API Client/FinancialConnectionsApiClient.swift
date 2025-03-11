@@ -16,13 +16,13 @@ struct FinancialConnectionsApiClient {
         private static let baseApiUrl: URL = URL(string: "https://api.stripe.com/v1")!
 
         case synchronize
-        case complete
+        case sessionReceipt
         case listAccounts
 
         var path: String {
             switch self {
             case .synchronize: "financial_connections/sessions/synchronize"
-            case .complete: "link_account_sessions/complete"
+            case .sessionReceipt: "link_account_sessions/session_receipt"
             case .listAccounts: "link_account_sessions/list_accounts"
             }
         }
@@ -60,22 +60,43 @@ struct FinancialConnectionsApiClient {
         parameters: [String: Any],
         method: HTTPMethod
     ) async throws -> T {
-        var request = URLRequest(url: endpoint.url)
-        let formData = URLEncoder.queryString(from: parameters).data(using: .utf8)
-        request.httpBody = formData
+        var request: URLRequest
+
+        switch method {
+        case .get:
+            // For GET requests: append parameters to URL
+            guard var components = URLComponents(url: endpoint.url, resolvingAgainstBaseURL: true) else {
+                throw URLError(.badURL)
+            }
+
+            let flattenedParams = URLEncoder.flattenParameters(parameters)
+            let queryItems = flattenedParams.map { key, value in
+                URLQueryItem(name: key, value: "\(value)")
+            }
+            components.queryItems = queryItems.isEmpty ? nil : queryItems
+
+            guard let url = components.url else {
+                throw URLError(.badURL)
+            }
+
+            request = URLRequest(url: url)
+            
+        case .post:
+            // For POST requests: use form data in body
+            request = URLRequest(url: endpoint.url)
+
+            let formData = URLEncoder.queryString(from: parameters).data(using: .utf8)
+            request.httpBody = formData
+
+            if let formData {
+                request.setValue(String(formData.count), forHTTPHeaderField: "Content-Length")
+            }
+            request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        }
+
+        // Common headers for all requests
         request.httpMethod = method.rawValue
-        request.setValue(
-            "Bearer \(publishableKey)",
-            forHTTPHeaderField: "Authorization"
-        )
-        request.setValue(
-            String(format: "%lu", UInt(formData?.count ?? 0)),
-            forHTTPHeaderField: "Content-Length"
-        )
-        request.setValue(
-            "application/x-www-form-urlencoded",
-            forHTTPHeaderField: "Content-Type"
-        )
+        request.setValue("Bearer \(publishableKey)", forHTTPHeaderField: "Authorization")
 
         let (data, _) = try await URLSession.shared.data(for: request)
         return try Self.decoder.decode(T.self, from: data)
@@ -102,7 +123,7 @@ extension FinancialConnectionsApiClient {
         clientSecret: String
     ) async throws -> Session {
         // First, get the initial session
-        let initialSession = try await completeSession(clientSecret: clientSecret)
+        let initialSession = try await sessionReceipt(clientSecret: clientSecret)
 
         // If there are no more accounts to fetch, return the session as is
         if !initialSession.accounts.hasMore {
@@ -146,13 +167,13 @@ extension FinancialConnectionsApiClient {
         )
     }
     
-    private func completeSession(
+    private func sessionReceipt(
         clientSecret: String
     ) async throws -> Session {
         let parameters: [String: Any] = [
             "client_secret": clientSecret,
         ]
-        return try await post(endpoint: .complete, parameters: parameters)
+        return try await get(endpoint: .sessionReceipt, parameters: parameters)
     }
 
     private func listAccounts(
