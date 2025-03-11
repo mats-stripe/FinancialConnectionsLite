@@ -8,11 +8,7 @@
 import Foundation
 
 struct FinancialConnectionsApiClient {
-    private static let decoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return decoder
-    }()
+    private static let decoder = JSONDecoder()
 
     private let publishableKey: String
 

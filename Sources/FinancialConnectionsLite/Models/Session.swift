@@ -17,12 +17,24 @@ public struct Session: Decodable {
     public let livemode: Bool
     /// The accounts that were collected as part of this Session.
     public let accounts: AccountList
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case clientSecret = "client_secret"
+        case livemode
+        case accounts
+    }
 }
 
 public struct AccountList: Decodable {
     public let data: [Account]
     /// True if this list has another page of items after this one that can be fetched.
     public let hasMore: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case data
+        case hasMore = "has_more"
+    }
 }
 
 public struct Account: Decodable {
@@ -49,6 +61,22 @@ public struct Account: Decodable {
     public let permissions: [Permission]?
     /// The supported payment method types for this account.
     public let supportedPaymentMethodTypes: [PaymentMethodType]
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case livemode
+        case displayName = "display_name"
+        case status
+        case institutionName = "institution_name"
+        case last4
+        case created
+        case balance
+        case balanceRefresh = "balance_refresh"
+        case category
+        case subcategory
+        case permissions
+        case supportedPaymentMethodTypes = "supported_payment_method_types"
+    }
 }
 
 public struct Balance: Decodable {
@@ -62,12 +90,25 @@ public struct Balance: Decodable {
     public let credit: [String: Int]?
     /// The balances owed to (or by) the account holder.
     public let current: [String: Int]
+    
+    enum CodingKeys: String, CodingKey {
+        case asOf = "as_of"
+        case type
+        case cash
+        case credit
+        case current
+    }
 }
 
 public struct BalanceRefresh: Decodable {
     public let status: BalanceRefreshStatus
     /// The UNIX timestamp (in milliseconds) of the time at which the last refresh attempt was initiated.
     public let lastAttemptedAt: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case status
+        case lastAttemptedAt = "last_attempted_at"
+    }
 }
 
 public enum AccountStatus: String, Decodable {
