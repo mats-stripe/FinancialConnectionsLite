@@ -2,7 +2,7 @@ import UIKit
 
 public class FinancialConnectionsLite: NSObject {
     public enum FlowResult {
-        case success(String)
+        case success(Session)
         case canceled
         case failure(Error)
     }

@@ -14,7 +14,7 @@ class ContainerViewController: UIViewController {
     private let completion: ((FinancialConnectionsLite.FlowResult) -> Void)
 
     private let spinner = UIActivityIndicatorView(style: .large)
-    
+
     private var authFlowViewController: AuthFlowViewController?
 
     init(
@@ -43,7 +43,7 @@ class ContainerViewController: UIViewController {
             await fetchHostedUrl()
         }
     }
-    
+
     private func setupSpinner() {
         spinner.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(spinner)
@@ -52,7 +52,7 @@ class ContainerViewController: UIViewController {
             spinner.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
         ])
     }
-    
+
     private func fetchHostedUrl() async {
         DispatchQueue.main.async {
             self.spinner.startAnimating()
@@ -75,7 +75,36 @@ class ContainerViewController: UIViewController {
                 self.spinner.stopAnimating()
             }
         }
+    }
+    
+    private func completeFlow(result: AuthFlowViewController.WebFlowResult) async {
+        if case .failure(let error) = result {
+            completion(.failure(error))
+            return
+        }
 
+        DispatchQueue.main.async {
+            self.spinner.startAnimating()
+        }
+
+        do {
+            let session = try await apiClient.fetchSessionWithAccounts(clientSecret: clientSecret)
+            if session.accounts.data.isEmpty {
+                completion(.canceled)
+            } else {
+                completion(.success(session))
+            }
+            
+            DispatchQueue.main.async {
+                self.spinner.stopAnimating()
+            }
+        } catch {
+            completion(.failure(error))
+
+            DispatchQueue.main.async {
+                self.spinner.stopAnimating()
+            }
+        }
     }
 
     private func showWebView(for manifest: LinkAccountSessionManifest) {
@@ -84,7 +113,14 @@ class ContainerViewController: UIViewController {
             returnUrl: returnUrl,
             completion: { [weak self] result in
                 guard let self = self else { return }
-                self.completion(result)
+
+                DispatchQueue.main.async {
+                    self.navigationController?.popToRootViewController(animated: false)
+                }
+
+                Task {
+                    await self.completeFlow(result: result)
+                }
             }
         )
         self.authFlowViewController = authFlowVC

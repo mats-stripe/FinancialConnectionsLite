@@ -10,9 +10,15 @@ import UIKit
 @preconcurrency import WebKit
 
 class AuthFlowViewController: UIViewController {
+    enum WebFlowResult {
+        case success
+        case canceled
+        case failure(Error)
+    }
+    
     private let manifest: LinkAccountSessionManifest
     private let returnUrl: URL
-    private let completion: ((FinancialConnectionsLite.FlowResult) -> Void)
+    private let completion: ((WebFlowResult) -> Void)
 
     private var webAuthenticationSession: ASWebAuthenticationSession?
 
@@ -21,7 +27,7 @@ class AuthFlowViewController: UIViewController {
     init(
         manifest: LinkAccountSessionManifest,
         returnUrl: URL,
-        completion: @escaping ((FinancialConnectionsLite.FlowResult) -> Void)
+        completion: @escaping ((WebFlowResult) -> Void)
     ) {
         self.manifest = manifest
         self.returnUrl = returnUrl
@@ -81,12 +87,10 @@ extension AuthFlowViewController: WKNavigationDelegate {
             return
         }
 
-        print("**** decidePolicyFor: \(url.absoluteString)")
-
         let urlString = url.absoluteString
         if urlString.hasPrefix(manifest.successURL.absoluteString) {
             decisionHandler(.cancel)
-            completion(.success(manifest.id))
+            completion(.success)
         } else if urlString.hasPrefix(manifest.cancelURL.absoluteString) {
             decisionHandler(.cancel)
             completion(.canceled)
